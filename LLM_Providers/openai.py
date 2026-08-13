@@ -1,9 +1,12 @@
 import os
-from LLM_Providers.LLM_Provider import Base_LLM_Provider
-from Constants.Base_Sys_Prompt import BASE_SYS_PROMPT
+from classes.LLM_provider import base_LLM_provider
 from openai import OpenAI
 
-class Open_AI(Base_LLM_Provider):
+class openai(base_LLM_provider):
+    """
+    Sample implementatioon of the "base_LLM_provider" interface for OpenAI's API.
+    Stable base that can be copied and modified slightly for other providers (Claude, Gemini, etc.)
+    """
     def __init__(self, API_key: str = ""):
         super().__init__(name="OpenAI", endpoint="https://api.openai.com/v1", API_key=API_key)
         resolved_API_key = self.API_key if self.API_key else os.environ.get("OPENAI_API_KEY")
@@ -31,7 +34,7 @@ class Open_AI(Base_LLM_Provider):
             response = self.client.chat.completions.create(
                 model=model,
                 messages=[
-                    {"role": "system", "content": BASE_SYS_PROMPT},
+                    {"role": "system", "content": self.config["base_sys_prompt"]},
                     {"role": "user", "content": in_context}
                 ]
             )

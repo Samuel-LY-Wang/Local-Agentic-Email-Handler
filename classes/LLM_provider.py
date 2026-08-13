@@ -1,4 +1,6 @@
-class Base_LLM_Provider:
+from config.load_config import load_config
+
+class base_LLM_provider:
     """
     This is a Java-style interface storing information about an LLM provider and some functions for authenticating and invoking a model from that provider.
     It will not work unless overridden by subclasses.
@@ -7,6 +9,7 @@ class Base_LLM_Provider:
         self.name = name
         self.endpoint = endpoint
         self.API_key = API_key
+        self.config = load_config("LLM")
     def authenticate(self) -> bool:
         """
         This is meant to be a Java-style interface for authenticating with a provider. It should be overridden by subclasses.

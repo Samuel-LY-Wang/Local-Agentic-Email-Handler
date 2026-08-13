@@ -1,10 +1,12 @@
-from LLM_Providers.LLM_Provider import Base_LLM_Provider
-from Constants.Base_Sys_Prompt import BASE_SYS_PROMPT
-import ollama
+from classes.LLM_provider import base_LLM_provider
+import ollama as llama
 
-class Ollama(Base_LLM_Provider):
+class ollama(base_LLM_provider):
+    """
+    Sample implementation of the "base_LLM_provider" interface for Ollama's API.
+    """
     def __init__(self):
-        pass # no params needed, just need the base class for polymorphism anyways
+        super().__init__(name="Ollama", endpoint="http://localhost:11434", API_key="")
 
     def authenticate(self) -> bool:
         """
@@ -17,9 +19,9 @@ class Ollama(Base_LLM_Provider):
         This is the method to invoke an Ollama model.
         """
         try:
-            resp = ollama.chat(model=model, messages=[{"role": "system", "content": BASE_SYS_PROMPT}, {"role": "user", "content": in_context}])
+            resp = llama.chat(model=model, messages=[{"role": "system", "content": self.config["base_sys_prompt"]}, {"role": "user", "content": in_context}])
             return resp['content']
-        except ollama.ResponseError as e:
+        except llama.ResponseError as e:
             raise Exception(f"Error invoking Ollama model: {e}")
         except Exception as e:
             raise Exception(f"An unexpected error occurred while invoking Ollama model: {e}")
