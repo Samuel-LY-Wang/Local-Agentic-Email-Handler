@@ -13,6 +13,11 @@ class base_email_provider:
         This is meant to be a Java-style interface for authenticating with a provider. It should be overridden by subclasses.
         """
         raise NotImplementedError("This method must be overridden by subclasses.")
+    def remove_acc(self):
+        """
+        This is meant to be a Java-style interface for removing an account from a provider. It should be overridden by subclasses.
+        """
+        raise NotImplementedError("This method must be overridden by subclasses.")
     def check(self) -> List[email]:
         """
         This method is a Java-style interface for reading emails from a provider. It must be overridden by subclasses.
