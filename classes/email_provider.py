@@ -8,25 +8,34 @@ class base_email_provider:
     """
     def __init__(self, name: str):
         self.name = name
-    def authenticate(self) -> bool:
+    def authenticate(self):
         """
         This is meant to be a Java-style interface for authenticating with a provider. It should be overridden by subclasses.
+        Intended use: Authenticates a user to the given email provider.
+        This method should handle authentication flow, token storage, and (if supported) refresh logic.
+        It should return nothing if authentication is successful and throw an Exception if it fails.
         """
         raise NotImplementedError("This method must be overridden by subclasses.")
     def remove_acc(self):
         """
         This is meant to be a Java-style interface for removing an account from a provider. It should be overridden by subclasses.
+        Intended use: Removes a user's account from this instance of the app.
+        This method should handle all necessary cleanup, such as deleting stored tokens, and (if supported) revoking access from the provider.
+        It should return nothing if removal is successful and throw an Exception if it fails.
         """
         raise NotImplementedError("This method must be overridden by subclasses.")
     def check(self) -> List[email]:
         """
         This method is a Java-style interface for reading emails from a provider. It must be overridden by subclasses.
+        Intended use: Reads emails from the user's inbox on the given email provider.
+        This method should return a list of email objects representing the emails in the user's inbox.
+        It should throw an Exception if reading emails fails.
         """
         raise NotImplementedError("This method must be overridden by subclasses.")
     def draft(self, new_email: email):
         """
         This method is a Java-style interface for adding an email to the draft folder of a provider.
-        If the provider supports a draft folder, this function must be overridden by subclass.
+        If the provider supports a draft folder, this function must be overridden by subclass. If not, it may remain.
         The parameters provided here may not be changed, as this is an interface.
         """
         raise NotImplementedError("This method must be overridden by subclasses.")

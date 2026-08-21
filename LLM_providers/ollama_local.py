@@ -1,7 +1,7 @@
 from classes.LLM_provider import base_LLM_provider
 import ollama as llama
 
-class ollama(base_LLM_provider):
+class ollama_local(base_LLM_provider):
     """
     Sample implementation of the "base_LLM_provider" interface for Ollama's API.
     """
