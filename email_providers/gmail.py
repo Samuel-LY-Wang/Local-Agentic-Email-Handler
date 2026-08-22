@@ -2,6 +2,7 @@ from classes.email_provider import base_email_provider
 from classes.email import email
 from config.defaults import SERVER_ENDPOINT
 from util.open_in_browser import open_in_browser
+from util.rsa import *
 from typing import List
 import requests
 import secrets
@@ -51,21 +52,18 @@ def parse_oauth2_callback(callback_url: str, exp_state: str) -> str:
 
     return code
 
-def exchange_code(code: str, client_id: str, redirect_uri: str, code_verifier: str) -> dict:
+def exchange_code(uid: str, code: str, redirect_uri: str, code_verifier: str, server_endpoint: str) -> dict:
     """
     Exchanges the authorization code for an access token.
     """
-    token_url = "https://oauth2.googleapis.com/token"
-    data = {
-        "code": code,
-        "client_id": client_id,
-        "redirect_uri": redirect_uri,
-        "grant_type": "authorization_code",
-        "code_verifier": code_verifier,
-    }
-    response = requests.post(token_url, data=data)
+    server_n = int(requests.get(f"{server_endpoint}/get_n", params={"uid": uid}).json().get("n"))
+    verifier_enc, enc_key = rsa_encrypt(server_n, code_verifier)
+    response = requests.post(
+        f"{server_endpoint}/google_token_exchange",
+        json={"code": code, "uuid": uid, "redirect_uri": redirect_uri, "code_verifier": verifier_enc.hex(), "enc_key": enc_key.hex()}
+    )
     if response.status_code != 200:
-        raise RuntimeError(f"Failed to exchange code for token: {response.text}")
+        raise RuntimeError(f"Failed to exchange code: {response.text}")
     return response.json()
 
 class google(base_email_provider):
@@ -74,6 +72,8 @@ class google(base_email_provider):
     """
     def __init__(self):
         super().__init__("google")
+        with open("config/uuid.txt", "r") as f:
+            self.uid = f.read().strip()
 
     def authenticate(self):
         """
@@ -91,6 +91,7 @@ class google(base_email_provider):
             params = {
                 "client_id": CLIENT_ID,
                 "response_type": "code",
+                "redirect_uri": redirect_uri,
                 "scope": " ".join(SCOPES),
                 "state": state,
                 "code_challenge": code_challenge,
@@ -101,7 +102,7 @@ class google(base_email_provider):
             auth_url = "https://accounts.google.com/o/oauth2/v2/auth?" + urlencode(params)
             open_in_browser(auth_url)
             code = parse_oauth2_callback(listener.accept()[0].recv(1024).decode("utf-8"), state)
-            token = exchange_code(code, CLIENT_ID, redirect_uri, code_verifier)
+            token = exchange_code(self.uid, code, redirect_uri, code_verifier, SERVER_ENDPOINT)
             self.access_token = token["access_token"]
             self.id_token = token.get("id_token")
             with open("auth/gmail_token.json", "w") as f:
